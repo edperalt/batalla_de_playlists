@@ -1,13 +1,3 @@
----
-title: "La batalla de las listas de canciones"
-subtitle: "Pietro vs  Papá "
-date: "2021-01-24"
-output:
-  prettydoc::html_pretty:
-    theme: architect
-    highlight: github
-    keep_md: yes
----
 
 
 ## Los participantes!!
