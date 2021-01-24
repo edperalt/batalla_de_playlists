@@ -1,4 +1,6 @@
+## La batalla de las listas
 
+Este es un juego que hicimos con mi hijo menor comaprando nuestras listas de Spotify.   
 
 ## Los participantes!!
  ![](scripts/Pi_dad.jpeg)
