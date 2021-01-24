@@ -1,0 +1,213 @@
+---
+title: "The playlist battle"
+subtitle: "Pietro vs  Papá "
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+    keep_md: yes
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(lubridate)
+library(tidyverse)
+library(Hmisc)
+library(knitr)
+library(janitor)
+library(emo)
+library(tidytext)
+```
+
+
+
+## The Players!!
+ ![](Pi_dad.jpeg)
+<br>
+<br>
+
+## Two *Spotify* playlists
+
+- Dad`s Beats
+- Pietros Playlist 2.0
+
+<br>
+<br>
+
+
+## We want to answer a few questions
+
+<br>
+Spotify presents in its API several measures associated to each track, we are basing our challenge in the comparison of this values.
+<br>
+
+- Who´s the retro lover here??
+- Anyone for acoustic??
+- Dance floor time
+- are they happy songs?
+- anyone annoying the neighbors??
+
+<br>
+<br>
+
+## the True **YOUNG SPIRIT AWARD** goes to...
+
+```{r echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+battle_df<- readRDS("../raw_data/2020_11_08_Pi_vs_dad.RDS")
+
+battle_df <-  battle_df %>%  
+  select(danceability, energy, loudness, mode, speechiness, acousticness, instrumentalness,
+         liveness, valence, tempo, track.artists, track.album.release_date, playlist, track.name) %>% unnest(track.artists) %>% 
+  rename(year = 
+           track.album.release_date) %>% 
+  mutate(year = str_sub(year , end = 4))
+
+battle_df$year = as.integer(battle_df$year)
+
+the_colors <- c("#009E73", "orange")
+
+battle_df %>% 
+  
+  ggplot()+
+  geom_density(aes(year, group = playlist, fill = playlist), alpha = 0.7)+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45),
+        text = element_text(size=20),legend.position = "bottom") +
+  scale_y_continuous(labels = scales::percent_format())+
+  scale_x_continuous(labels = seq(1950, 2020, 10),
+                     breaks = seq(1950, 2020, 10)
+                     )+
+  scale_colour_manual(values = the_colors,
+                      aesthetics = "fill") +
+  labs(y = "% of # songs / year",
+       color = "Playlist")
+
+
+
+```
+
+### WELL WELL WELL!! someone has a very <span style="color:red"> *YOUNG SPIRIT* </span>  around here!!!
+
+<br>
+<br>
+
+## We want to review who is more inclined towards acoustic music
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+battle_df %>% 
+  
+  ggplot()+
+  # geom_density(aes(year, group = playlist, fill = playlist), alpha = 0.5)+
+  geom_violin(aes(playlist, acousticness , fill = playlist))+
+  geom_boxplot(aes(playlist, acousticness ), color="red", width = 0.05) +
+  theme_minimal()+
+   theme( text = element_text(size=10),legend.position = "bottom") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  geom_jitter(aes(playlist, acousticness ),shape=16, position=position_jitter(0.05), alpha = 0.5) +
+  scale_colour_manual(values = the_colors,
+                      aesthetics = "fill")+
+  labs(y = "% of acousticness of a song",
+       x= "",
+       color = "Playlist")
+
+
+
+```
+
+### This is a very close call... although a slight acousticness advantage goes to dad
+<br>
+<br>
+<br>
+<br>
+
+##  party time, lets check their tools!!!
+the higher the danceability score, the more likely the track will make people spin on a party!!!
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+battle_df %>% 
+  group_by(playlist) %>% 
+  arrange(desc(danceability) ) %>% 
+  select(track.name, danceability) %>% 
+  distinct() %>% head(n=10) %>%
+  janitor::clean_names() %>% 
+  kable()
+
+```
+
+### The <span style="color:blue50"> *TOP TEN DANCEABILITY* </span> has a winner!!!
+
+
+<br>
+<br>
+<br>
+
+## do we have happy `r emo::ji("smile")` songs??
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+battle_df %>% 
+  
+  ggplot()+
+   geom_histogram(aes(valence, y= stat(width*density), group = playlist, fill = playlist), alpha = 0.7, bins = 10)+
+  scale_colour_manual(values = the_colors,
+                      aesthetics = "fill") +
+  # geom_boxplot(aes(playlist, acousticness ), color="red", width = 0.05) +
+  theme_minimal()+
+   theme( text = element_text(size=10),legend.position = "bottom") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  # geom_jitter(aes(playlist, acousticness ),shape=16, position=position_jitter(0.05), alpha = 0.5) +
+
+  labs(y = "% percentage of songs for each hapiness rate",
+       x=  "happines level",
+       color = "Playlist")+ facet_wrap(~playlist)
+
+
+
+
+```
+
+### The positive messages in the songs are clearly for our Young player!!! <span style="color:darkgreen"> *great theme choices!!!* </span> 
+
+
+
+
+## Loudness is a classic, a loud track.. only makes sense with one volume!!!
+
+
+```{r}
+  # mutate(terms = reorder_within(terms, abs(value), component)) %>%
+
+
+battle_df %>%
+  mutate_if(is.character, factor) %>% 
+  mutate(track.name = reorder_within(track.name, loudness, playlist)) %>% 
+  group_by(playlist) %>% 
+  top_n(10, loudness ) %>% 
+  ungroup() %>% 
+  # head(20) %>% 
+  ggplot()+
+  geom_segment(aes(x=track.name, xend=track.name, y=-5.5, yend= loudness ) ) +
+   geom_point(aes(track.name, y= loudness,  color = playlist), alpha = 1, size = 4)+
+ 
+  scale_colour_manual(values = the_colors,
+                      aesthetics = "color") +
+  # geom_boxplot(aes(playlist, acousticness ), color="red", width = 0.05) +
+  theme_minimal()+
+   theme( text = element_text(size=10),legend.position = "bottom") +
+ 
+
+
+  labs(y = "Loudness increases ---->",
+       x=  "",
+       color = "Playlist")+
+  coord_flip()
+# + facet_wrap(~playlist)
+
+
+
+```
+
+
+
