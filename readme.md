@@ -1,18 +1,6 @@
----
-title: "La batalla de las listas de canciones"
-subtitle: "Pietro vs  Papá "
-date: "2021-01-24"
-output:
-  prettydoc::html_pretty:
-    theme: architect
-    highlight: github
-    keep_md: yes
----
-
-<<<<<<< HEAD
-=======
+## La batalla  de las listas
 Este es un juego que hicimos con mi hijo menor comparando nuestras listas de Spotify.   
->>>>>>> 10faf8e1348f7716759d78dbc6e159d10011f5fe
+
 
 ## Los participantes!!
  ![](scripts/Pi_dad.jpeg)
